@@ -10,41 +10,36 @@
         :root { --p1: #e74c3c; --p2: #3498db; --neon: #f1c40f; --win-green: #2ecc71; }
         * { font-family: 'Fredoka', sans-serif; box-sizing: border-box; font-variant: small-caps; -webkit-tap-highlight-color: transparent; }
         
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; touch-action: manipulation; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
         #bg-layer { position: fixed; inset: 0; background-image: url('title_bg.jpg'); background-size: cover; background-position: center; z-index: 1; }
         
-        .screen { position: absolute; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); padding: 10px; }
+        .screen { position: absolute; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); padding: 20px; }
         #select-screen, #editor-screen, #game-container, #victory-screen { display: none; }
 
-        .white-box { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 30px; border: 8px solid var(--neon); display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1000px; }
-        
-        .arena-layout { display: grid; grid-template-columns: 1fr 1fr; width: 95vw; height: 90vh; gap: 15px; }
-        
-        @media (max-width: 768px) {
-            .arena-layout { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
-            .sprite-img { height: 120px !important; }
-            .btn-opt img { height: 70px !important; }
-        }
+        /* Huge Selection UI */
+        .char-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 900px; padding: 20px; }
+        .char-card { background: white; border: 8px solid #fff; border-radius: 25px; cursor: pointer; transition: 0.3s; position: relative; }
+        .char-card img { width: 100%; height: 180px; object-fit: contain; }
+        .char-card.selected { border-color: var(--win-green); transform: scale(1.05); }
 
-        .player-side { display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 5px; }
-        .sprite-img { height: 220px; width: auto; filter: drop-shadow(0 0 15px rgba(0,0,0,0.2)); transition: filter 0.2s; }
-        .hp-bar { width: 90%; height: 20px; background: #333; border: 2px solid #000; border-radius: 10px; overflow: hidden; }
+        .diff-btn { padding: 12px 20px; border-radius: 15px; border: 3px solid #fff; cursor: pointer; background: #333; color: white; font-weight: bold; }
+        .diff-btn.active { background: var(--neon); color: black; border-color: black; }
+
+        /* Arena */
+        .arena-layout { display: grid; grid-template-columns: 1fr 1fr; width: 95vw; height: 90vh; }
+        @media (max-width: 768px) { .arena-layout { grid-template-columns: 1fr; } }
+        
+        .hp-bar { width: 90%; height: 25px; background: #333; border: 3px solid #000; border-radius: 15px; overflow: hidden; }
         .hp-fill { width: 100%; height: 100%; background: var(--win-green); transition: 0.4s; }
         
-        .quiz-card { background: #f0f0f0; padding: 10px; border-radius: 20px; width: 100%; border: 3px solid #ccc; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        
-        .btn-opt { padding: 4px; border-radius: 15px; border: 4px solid #fff; cursor: pointer; background: #fff; }
-        .btn-opt img { width: 100%; height: 110px; object-fit: contain; border-radius: 8px; }
-        .btn-correct { border-color: var(--win-green) !important; animation: pop 0.3s ease; }
+        .btn-opt { border: 6px solid #fff; border-radius: 20px; cursor: pointer; background: #fff; }
+        .btn-opt img { width: 100%; height: 120px; object-fit: contain; }
+        .btn-correct { border-color: var(--win-green) !important; }
 
-        @keyframes pop { 50% { transform: scale(1.1); } }
-
-        .editor-container { width: 100%; max-height: 40vh; overflow-y: auto; background: white; padding: 10px; border-radius: 15px; }
-        .edit-item { display: flex; align-items: center; gap: 10px; background: #f9f9f9; padding: 8px; border-radius: 12px; margin-bottom: 8px; }
-        .edit-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+        .main-btn { padding: 15px 40px; font-size: 2rem; border-radius: 50px; background: var(--neon); color: #000; cursor: pointer; font-weight: bold; border: none; }
         
-        .main-btn { padding: 12px 30px; font-size: 1.5rem; border-radius: 40px; background: var(--neon); color: #000; cursor: pointer; font-weight: bold; border: none; margin: 8px; width: 80%; max-width: 300px; }
+        /* QR Styling */
+        #qr-display { background: white; padding: 20px; border-radius: 20px; margin: 10px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -52,103 +47,102 @@
     <div id="bg-layer"></div>
 
     <div id="title-screen" class="screen">
-        <h1 style="font-size: 4rem; color: var(--neon); text-shadow: 4px 4px 0 #000; text-align: center;">GRAND LINE</h1>
+        <h1 style="font-size: 5rem; color: var(--neon); text-shadow: 5px 5px 0 #000;">GRAND LINE</h1>
         <button class="main-btn" onclick="goToSelection(false)">1 PLAYER</button>
-        <button class="main-btn" onclick="goToSelection(true)" style="background: #3498db;">2 PLAYERS</button>
-        <button class="main-btn" style="background: #95a5a6; font-size: 1rem;" onclick="showEditor()">EDITOR & QR</button>
-    </div>
-
-    <div id="editor-screen" class="screen">
-        <div class="white-box">
-            <h2>EDITOR & SHARE</h2>
-            <div id="qr-area" style="display:none; padding:15px; background:white; margin-bottom:10px; border-radius:15px;"></div>
-            <button class="main-btn" onclick="generateSharedQR()" style="background:#e67e22; font-size:1rem;">GENERATE QR FOR CLASS</button>
-            <p style="font-size: 0.8rem; color: #666; margin: 0;">(This QR includes your saved words)</p>
-            <div class="editor-container" id="editor-list"></div>
-            <button class="main-btn" onclick="addWord()" style="background:#3498db; font-size:1rem;">+ ADD WORD</button>
-            <button class="main-btn" onclick="closeEditor()" style="background:var(--win-green); font-size:1rem;">SAVE & EXIT</button>
-        </div>
+        <button class="main-btn" onclick="goToSelection(true)" style="background: #3498db; margin-top:20px;">2 PLAYERS</button>
+        <button onclick="showEditor()" style="margin-top:40px; color:white; cursor:pointer; background:none; border:1px solid white; padding:5px 15px; border-radius:20px;">EDITOR / SHARE</button>
     </div>
 
     <div id="select-screen" class="screen">
-        <h2 style="color:gold; font-size: 2.5rem;">CHOOSE HERO</h2>
-        <div style="display:flex; flex-wrap: wrap; justify-content: center; gap:15px;">
-            <div id="grid1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;"></div>
+        <h2 style="color:var(--neon); font-size: 3rem;">SELECT PIRATE</h2>
+        <div id="diff-row" style="margin-bottom:20px; display:flex; gap:10px;">
+            <button class="diff-btn active" onclick="setDiff(0.7, this)">EASY</button>
+            <button class="diff-btn" onclick="setDiff(0.5, this)">NORMAL</button>
+            <button class="diff-btn" onclick="setDiff(0.2, this)">HARD</button>
         </div>
-        <button class="main-btn" id="fight-btn" style="display:none; background:#e74c3c; margin-top:15px;" onclick="startGame()">FIGHT!</button>
+        <div class="char-grid" id="char-grid"></div>
+        <button class="main-btn" id="fight-btn" style="display:none; background:#e74c3c; margin-top:20px;" onclick="startGame()">BATTLE!</button>
     </div>
 
-    <div id="game-container" class="screen">
-        <div class="white-box arena-layout">
-            <div class="player-side">
-                <img src="" id="p1-img" class="sprite-img">
+    <div id="editor-screen" class="screen">
+        <div style="background:white; padding:25px; border-radius:30px; width:90%; max-width:600px; text-align:center;">
+            <h3>EDITOR & SHARING</h3>
+            <div id="qr-display" style="display:none;"></div>
+            <br>
+            <button class="diff-btn" style="background:#e67e22" onclick="generateSharedQR()">GENERATE NEW QR</button>
+            <div id="editor-list" style="max-height:250px; overflow:auto; margin:15px 0; border:1px solid #ddd;"></div>
+            <button class="diff-btn" onclick="addWord()">+ ADD WORD</button>
+            <button class="diff-btn" style="background:var(--win-green)" onclick="closeEditor()">SAVE & EXIT</button>
+        </div>
+    </div>
+
+    <div id="game-container" class="screen" style="background:none;">
+        <div class="arena-layout">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:space-around;">
+                <img id="p1-img" style="height:250px;">
                 <div class="hp-bar"><div id="p1-hp" class="hp-fill"></div></div>
-                <div class="quiz-card"><div class="options-grid" id="p1-opts"></div></div>
+                <div id="p1-opts" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:90%;"></div>
             </div>
-            <div class="player-side">
-                <img src="" id="p2-img" class="sprite-img">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:space-around;">
+                <img id="p2-img" style="height:250px;">
                 <div class="hp-bar"><div id="p2-hp" class="hp-fill"></div></div>
-                <div class="quiz-card"><div class="options-grid" id="p2-opts"></div></div>
+                <div id="p2-opts" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:90%;"></div>
             </div>
-        </div>
-    </div>
-
-    <div id="victory-screen" class="screen">
-        <div class="white-box">
-            <h1 id="victory-text" style="font-size: 2.5rem;"></h1>
-            <img id="winner-gif" src="" style="height:200px; border-radius:15px;">
-            <button class="main-btn" onclick="location.reload()">REPLAY</button>
         </div>
     </div>
 
     <script>
-        const characters = ["luffy.gif", "zoro.gif", "sanji.gif", "nami.gif", "chopper.gif"];
-        let p1Char, p2Char, h1=100, h2=100, isTwoPlayer=false, cpuInterval, currentWord="";
+        const characters = [
+            {name: "Luffy", file: "luffy.gif"}, {name: "Zoro", file: "zoro.gif"},
+            {name: "Sanji", file: "sanji.gif"}, {name: "Nami", file: "nami.gif"},
+            {name: "Chopper", file: "chopper.gif"}
+        ];
+
+        let p1Char, p2Char, isTwoPlayer, currentWord, cpuChance=0.7, h1=100, h2=100;
         
-        // --- DATA SYNC LOGIC ---
-        function getInitialData() {
-            const hashData = window.location.hash.substring(1);
-            if (hashData) {
+        // Load Data (URL hash first, then local storage)
+        function initData() {
+            const hash = window.location.hash.substring(1);
+            if(hash) {
                 try {
-                    const decoded = JSON.parse(decodeURIComponent(atob(hashData)));
-                    localStorage.setItem('seaBattleCache', JSON.stringify(decoded));
-                    window.location.hash = ""; // Clean URL after import
-                    return decoded;
-                } catch(e) { console.error("Import failed"); }
+                    const data = JSON.parse(decodeURIComponent(atob(hash)));
+                    localStorage.setItem('seaBattleCache', JSON.stringify(data));
+                    window.location.hash = "";
+                    return data;
+                } catch(e) { console.error("QR Load Failed"); }
             }
             return JSON.parse(localStorage.getItem('seaBattleCache')) || [
-                {word: "quilt", img: "quilt.jpg"}, {word: "queen", img: "queen.jpg"},
-                {word: "rabbit", img: "rabbit.jpg"}, {word: "robot", img: "robot.jpg"}
+                {word: "cat", img: "cat.jpg"}, {word: "dog", img: "dog.jpg"}
             ];
         }
 
-        let questionBank = getInitialData();
+        let questionBank = initData();
+
+        function speak(txt) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang='en-US'; window.speechSynthesis.speak(u); }
 
         function generateSharedQR() {
-            const area = document.getElementById('qr-area');
-            area.innerHTML = "";
-            area.style.display = "block";
+            const display = document.getElementById('qr-display');
+            display.innerHTML = ""; 
+            display.style.display = "inline-block";
             
-            // Encode words into the URL
+            // This compresses your word list into a link
             const dataString = btoa(encodeURIComponent(JSON.stringify(questionBank)));
             const shareUrl = window.location.origin + window.location.pathname + "#" + dataString;
             
-            new QRCode(area, { text: shareUrl, width: 200, height: 200 });
+            new QRCode(display, { text: shareUrl, width: 200, height: 200 });
         }
-        // -----------------------
 
-        function speak(txt) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang='en-US'; window.speechSynthesis.speak(u); }
         function showEditor() { document.getElementById('title-screen').style.display='none'; document.getElementById('editor-screen').style.display='flex'; renderEditor(); }
-        
         function renderEditor() {
             const list = document.getElementById('editor-list'); list.innerHTML = '';
             questionBank.forEach((item, i) => {
-                const div = document.createElement('div'); div.className = 'edit-item';
-                div.innerHTML = `<img src="${item.img}" onclick="speak('${item.word}')">
-                    <input type="text" value="${item.word}" style="flex:1;" onchange="questionBank[${i}].word=this.value.toLowerCase();save()">
+                const div = document.createElement('div');
+                div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid #eee;";
+                div.innerHTML = `<img src="${item.img}" style="width:40px;height:40px;" onclick="speak('${item.word}')">
+                    <input type="text" value="${item.word}" style="flex:1" onchange="questionBank[${i}].word=this.value.toLowerCase();save()">
                     <input type="file" id="f-${i}" style="display:none" onchange="upload(${i},this)">
                     <button onclick="document.getElementById('f-${i}').click()">UP</button>
-                    <button style="background:red;color:white;" onclick="questionBank.splice(${i},1);renderEditor();save()">DEL</button>`;
+                    <button style="color:red" onclick="questionBank.splice(${i},1);renderEditor();save()">X</button>`;
                 list.appendChild(div);
             });
         }
@@ -157,19 +151,23 @@
         function save() { localStorage.setItem('seaBattleCache', JSON.stringify(questionBank)); }
         function closeEditor() { document.getElementById('editor-screen').style.display='none'; document.getElementById('title-screen').style.display='flex'; }
 
+        function setDiff(val, btn) { cpuChance = val; document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+
         function goToSelection(tp) {
             isTwoPlayer = tp;
             document.getElementById('title-screen').style.display='none';
             document.getElementById('select-screen').style.display='flex';
-            document.getElementById('grid1').innerHTML = characters.map(c => `<img src="${c}" style="width:75px; border:4px solid #fff; border-radius:10px;" onclick="setChar(1,'${c}',this)">`).join('');
-            p2Char = characters[Math.floor(Math.random()*characters.length)];
+            document.getElementById('diff-row').style.display = tp ? 'none' : 'flex';
+            const grid = document.getElementById('char-grid');
+            grid.innerHTML = characters.map(c => `<div class="char-card" onclick="pick('${c.file}','${c.name}',this)"><img src="${c.file}"><center>${c.name}</center></div>`).join('');
         }
 
-        function setChar(p, c, el) {
-            p1Char = c;
-            Array.from(el.parentElement.children).forEach(i => i.style.borderColor='#fff');
-            el.style.borderColor = 'var(--win-green)';
-            document.getElementById('fight-btn').style.display='block';
+        function pick(file, name, el) {
+            p1Char = file; speak(name + "!");
+            document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            if(!isTwoPlayer) p2Char = characters[Math.floor(Math.random()*characters.length)].file;
+            document.getElementById('fight-btn').style.display = 'block';
         }
 
         function startGame() {
@@ -178,14 +176,12 @@
             document.getElementById('p1-img').src = p1Char;
             document.getElementById('p2-img').src = p2Char;
             nextRound();
-            if(!isTwoPlayer) {
-                cpuInterval = setInterval(() => {
-                    if(Math.random() > 0.6) {
-                        document.querySelectorAll('#p2-opts .btn-opt').forEach(b => { if(b.getAttribute('data-word') === currentWord) b.classList.add('btn-correct'); });
-                        setTimeout(() => { attack(1); nextRound(); }, 800);
-                    }
-                }, 7000);
-            }
+            if(!isTwoPlayer) setInterval(() => {
+                if(Math.random() > cpuChance) {
+                    document.querySelectorAll('#p2-opts .btn-opt').forEach(b => { if(b.dataset.word === currentWord) b.classList.add('btn-correct'); });
+                    setTimeout(() => { doHit(1); nextRound(); }, 700);
+                }
+            }, 7000);
         }
 
         function nextRound() {
@@ -194,30 +190,21 @@
             let opts = [target, ...questionBank.filter(q => q !== target).sort(() => 0.5-Math.random()).slice(0,3)].sort(() => 0.5-Math.random());
             [1, 2].forEach(p => {
                 const b = document.getElementById(`p${p}-opts`);
-                b.innerHTML = opts.map(o => `<button class="btn-opt" data-word="${o.word}" onclick="handlePress(${p},this,'${o.word}','${target.word}')"><img src="${o.img}"></button>`).join('');
+                b.innerHTML = opts.map(o => `<button class="btn-opt" data-word="${o.word}" onclick="check(${p},this,'${o.word}')"><img src="${o.img}"></button>`).join('');
             });
         }
 
-        function handlePress(p, el, choice, correct) {
-            if(choice === correct) {
-                el.classList.add('btn-correct');
-                setTimeout(() => { attack(p===1?2:1); nextRound(); }, 300);
-            } else { nextRound(); }
+        function check(p, el, choice) {
+            if(choice === currentWord) { el.classList.add('btn-correct'); setTimeout(() => { doHit(p===1?2:1); nextRound(); }, 200); }
+            else { nextRound(); }
         }
 
-        function attack(vic) {
-            const s = document.getElementById(`p${vic}-img`);
-            s.style.filter = "brightness(3) grayscale(1)";
-            if(vic===1) h1-=10; else h2-=10;
-            document.getElementById(`p${vic}-hp`).style.width = (vic===1?h1:h2)+"%";
-            setTimeout(() => s.style.filter="none", 250);
-            if(h1<=0 || h2<=0) {
-                clearInterval(cpuInterval);
-                document.getElementById('game-container').style.display='none';
-                document.getElementById('victory-screen').style.display='flex';
-                document.getElementById('victory-text').innerText = (h1<=0? (isTwoPlayer?"P2":"CPU") : "P1") + " WINS!";
-                document.getElementById('winner-gif').src = h1<=0 ? p2Char : p1Char;
-            }
+        function doHit(target) {
+            if(target===1) h1-=10; else h2-=10;
+            document.getElementById(`p${target}-hp`).style.width = Math.max(0, (target===1?h1:h2)) + "%";
+            const img = document.getElementById(`p${target}-img`);
+            img.style.filter = "brightness(3)"; setTimeout(() => img.style.filter="none", 200);
+            if(h1 <= 0 || h2 <= 0) location.reload(); // Simple win reset
         }
     </script>
 </body>
