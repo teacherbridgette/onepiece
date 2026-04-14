@@ -22,10 +22,10 @@
         .editor-container { width: 95%; max-height: 60vh; overflow-y: auto; background: white; padding: 15px; border-radius: 20px; }
         .edit-item { display: flex; align-items: center; gap: 15px; background: #f9f9f9; padding: 10px; border-radius: 15px; margin-bottom: 10px; border: 2px solid #ddd; }
         .edit-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 2px solid var(--neon); cursor: pointer; }
-        .edit-item input { flex: 1; padding: 8px; font-size: 1.1rem; border: 2px solid #ccc; border-radius: 10px; }
-        .editor-btn { background: #34495e; color: white; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; }
+        .edit-item input[type="text"] { flex: 1; padding: 8px; font-size: 1.1rem; border: 2px solid #ccc; border-radius: 10px; }
+        .editor-btn { background: #34495e; color: white; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
 
-        /* Arena */
+        /* Arena Layout */
         .arena-layout { display: flex; flex-direction: row; width: 95vw; height: 85vh; gap: 20px; }
         .player-side { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px; }
         .sprite-img { height: 260px; width: auto; filter: drop-shadow(0 0 25px rgba(0,0,0,0.2)); transition: filter 0.2s; }
@@ -35,7 +35,7 @@
         .quiz-card { background: #f0f0f0; padding: 15px; border-radius: 25px; width: 100%; border: 4px solid #ccc; }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        /* Choice Buttons */
+        /* Selection and Quiz Buttons */
         .btn-opt { padding: 5px; border-radius: 20px; border: 6px solid #fff; cursor: pointer; background: #fff; transition: border-color 0.2s; }
         .btn-opt img { width: 100%; height: 120px; object-fit: contain; border-radius: 10px; }
         .btn-correct { border-color: var(--win-green) !important; }
@@ -69,10 +69,6 @@
 
     <div id="select-screen" class="screen">
         <h2 style="color:gold; font-size: 3rem;">SELECT CHARACTER</h2>
-        <div id="diff-selector" style="margin-bottom:20px;">
-            <button class="main-btn" id="btn-easy" style="font-size:1rem; padding:10px 20px;" onclick="setDiff('easy')">EASY</button>
-            <button class="main-btn" id="btn-hard" style="font-size:1rem; padding:10px 20px; background:#bdc3c7;" onclick="setDiff('hard')">HARD</button>
-        </div>
         <div style="display:flex; gap:30px;">
             <div class="p-area">
                 <h3 style="color:var(--p1)">PLAYER 1</h3>
@@ -111,7 +107,7 @@
 
     <script>
         const characters = ["luffy.gif", "zoro.gif", "sanji.gif", "nami.gif", "chopper.gif"];
-        let p1Char, p2Char, h1=100, h2=100, isTwoPlayer=false, difficulty='easy', cpuInterval;
+        let p1Char, p2Char, h1=100, h2=100, isTwoPlayer=false, cpuInterval;
         let questionBank = JSON.parse(localStorage.getItem('seaBattleCache')) || [
             {word: "quilt", img: "quilt.jpg"}, {word: "queen", img: "queen.jpg"},
             {word: "rabbit", img: "rabbit.jpg"}, {word: "robot", img: "robot.jpg"},
@@ -121,20 +117,39 @@
         function speak(txt) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang='en-US'; window.speechSynthesis.speak(u); }
 
         function showEditor() { document.getElementById('title-screen').style.display='none'; document.getElementById('editor-screen').style.display='flex'; renderEditor(); }
+        
         function renderEditor() {
             const list = document.getElementById('editor-list'); list.innerHTML = '';
             questionBank.forEach((item, i) => {
                 const div = document.createElement('div'); div.className = 'edit-item';
-                div.innerHTML = `<img src="${item.img}" onclick="speak('${item.word}')"><input type="text" value="${item.word}" onchange="questionBank[${i}].word=this.value.toLowerCase();save()"><button class="editor-btn" onclick="const url=prompt('Img URL:');if(url){questionBank[${i}].img=url;renderEditor();save()}">IMG</button><button class="editor-btn" style="background:red;" onclick="questionBank.splice(${i},1);renderEditor();save()">DEL</button>`;
+                div.innerHTML = `
+                    <img src="${item.img}" onclick="speak('${item.word}')">
+                    <input type="text" value="${item.word}" onchange="questionBank[${i}].word=this.value.toLowerCase();save()">
+                    <input type="file" id="file-${i}" style="display:none" onchange="handleFileUpload(${i}, this)">
+                    <button class="editor-btn" onclick="document.getElementById('file-${i}').click()">UPLOAD</button>
+                    <button class="editor-btn" style="background:red;" onclick="questionBank.splice(${i},1);renderEditor();save()">DEL</button>
+                `;
                 list.appendChild(div);
             });
         }
+
+        function handleFileUpload(index, input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    questionBank[index].img = e.target.result;
+                    renderEditor();
+                    save();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function addWord() { questionBank.push({word: "new", img: "placeholder.jpg"}); renderEditor(); save(); }
         function save() { localStorage.setItem('seaBattleCache', JSON.stringify(questionBank)); }
         function closeEditor() { document.getElementById('editor-screen').style.display='none'; document.getElementById('title-screen').style.display='flex'; }
         function toggleQR() { const a = document.getElementById('qr-area'); a.style.display = a.style.display==='none'?'block':'none'; if(a.innerHTML==="") new QRCode(a, {text: window.location.href, width: 150, height: 150}); }
-
-        function setDiff(d) { difficulty = d; document.getElementById('btn-easy').style.background = d==='easy'?'var(--neon)':'#bdc3c7'; document.getElementById('btn-hard').style.background = d==='hard'?'var(--neon)':'#bdc3c7'; }
 
         function goToSelection(tp) {
             isTwoPlayer = tp;
@@ -168,10 +183,10 @@
             nextRound();
             if(!isTwoPlayer) {
                 cpuInterval = setInterval(() => {
-                    if(Math.random() > (difficulty==='easy'?0.75:0.35)) {
+                    if(Math.random() > 0.4) {
                         const btns = document.querySelectorAll('#p2-opts .btn-opt');
                         btns.forEach(b => { if(b.getAttribute('data-word') === currentWord) b.classList.add('btn-correct'); });
-                        setTimeout(() => { attack(1); nextRound(); }, 600);
+                        setTimeout(() => { attack(1); nextRound(); }, 700);
                     }
                 }, 6000);
             }
