@@ -7,41 +7,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --p1: #e74c3c; --p2: #3498db; --neon: #f1c40f; }
-        * { font-family: 'Fredoka', sans-serif; box-sizing: border-box; text-transform: uppercase; }
+        :root { --p1: #e74c3c; --p2: #3498db; --neon: #f1c40f; --win-green: #2ecc71; }
+        * { font-family: 'Fredoka', sans-serif; box-sizing: border-box; font-variant: small-caps; }
         
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
         #bg-layer { position: fixed; inset: 0; background-image: url('title_bg.jpg'); background-size: cover; background-position: center; z-index: 1; }
         
-        /* Screens - Forced hidden by default */
         .screen { position: absolute; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
         #select-screen, #editor-screen, #game-container, #victory-screen { display: none; }
 
         .white-box { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 40px; border: 10px solid var(--neon); display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .selection-container { display: flex; gap: 30px; background: rgba(0,0,0,0.9); padding: 25px; border-radius: 40px; border: 8px solid var(--neon); max-width: 95vw; }
         
-        .p-area { display: flex; flex-direction: column; align-items: center; min-width: 420px; }
-        .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .char-card { background: #111; padding: 8px; border-radius: 20px; cursor: pointer; border: 6px solid transparent; }
-        .char-card img { height: 120px; width: auto; object-fit: contain; }
-        
-        .diff-row { display: flex; gap: 10px; margin: 15px 0; }
-        .level-btn { padding: 10px 20px; border-radius: 15px; border: 3px solid #000; cursor: pointer; font-weight: bold; background: #ddd; }
-        .level-active { background: var(--neon); border-color: white; }
+        /* Editor Styles */
+        .editor-container { width: 95%; max-height: 60vh; overflow-y: auto; background: white; padding: 15px; border-radius: 20px; }
+        .edit-item { display: flex; align-items: center; gap: 15px; background: #f9f9f9; padding: 10px; border-radius: 15px; margin-bottom: 10px; border: 2px solid #ddd; }
+        .edit-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 2px solid var(--neon); cursor: pointer; }
+        .edit-item input { flex: 1; padding: 8px; font-size: 1.1rem; border: 2px solid #ccc; border-radius: 10px; }
+        .editor-btn { background: #34495e; color: white; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; }
 
+        /* Arena */
         .arena-layout { display: flex; flex-direction: row; width: 95vw; height: 85vh; gap: 20px; }
         .player-side { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px; }
-        .sprite-img { height: 300px; width: auto; filter: drop-shadow(0 0 25px rgba(0,0,0,0.2)); transition: 0.1s; }
-        .hp-bar { width: 90%; height: 35px; background: #333; border: 3px solid #000; border-radius: 20px; overflow: hidden; }
-        .hp-fill { width: 100%; height: 100%; background: #2ecc71; transition: 0.4s; }
+        .sprite-img { height: 260px; width: auto; filter: drop-shadow(0 0 25px rgba(0,0,0,0.2)); transition: filter 0.2s; }
+        .hp-bar { width: 90%; height: 30px; background: #333; border: 3px solid #000; border-radius: 15px; overflow: hidden; }
+        .hp-fill { width: 100%; height: 100%; background: var(--win-green); transition: 0.4s; }
         
         .quiz-card { background: #f0f0f0; padding: 15px; border-radius: 25px; width: 100%; border: 4px solid #ccc; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-opt { padding: 8px; border-radius: 20px; border: 5px solid #fff; cursor: pointer; background: #fff; }
-        .btn-opt img { width: 100%; height: 150px; object-fit: contain; border-radius: 10px; } 
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        /* Choice Buttons */
+        .btn-opt { padding: 5px; border-radius: 20px; border: 6px solid #fff; cursor: pointer; background: #fff; transition: border-color 0.2s; }
+        .btn-opt img { width: 100%; height: 120px; object-fit: contain; border-radius: 10px; }
+        .btn-correct { border-color: var(--win-green) !important; }
 
         .main-btn { padding: 15px 40px; font-size: 1.8rem; border-radius: 50px; background: var(--neon); color: #000; cursor: pointer; font-weight: bold; border: none; margin: 10px; }
-        #qr-display { background: white; padding: 15px; border-radius: 15px; margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -49,44 +48,42 @@
     <div id="bg-layer"></div>
 
     <div id="title-screen" class="screen">
-        <h1 style="font-size: 5rem; color: var(--neon); text-shadow: 6px 6px 0 #000; margin-bottom: 20px;">GRAND LINE</h1>
+        <h1 style="font-size: 5rem; color: var(--neon); text-shadow: 6px 6px 0 #000;">GRAND LINE</h1>
         <button class="main-btn" onclick="goToSelection(false)">1 PLAYER (CPU)</button>
         <button class="main-btn" onclick="goToSelection(true)" style="background: #3498db;">2 PLAYERS</button>
-        <button class="main-btn" style="background: #95a5a6; font-size: 1.1rem;" onclick="showEditor()">QUESTION EDITOR & QR</button>
+        <button class="main-btn" style="background: #95a5a6; font-size: 1.1rem;" onclick="showEditor()">EDITOR & QR CODE</button>
     </div>
 
     <div id="editor-screen" class="screen">
-        <div class="white-box" style="width: 80%; max-height: 90vh; overflow-y: auto;">
-            <h2 style="color: #000;">EDITOR & QR CODE</h2>
-            <div id="qr-display"></div>
-            <button class="main-btn" onclick="generateQR()" style="background: #e67e22; font-size: 1.2rem;">SHOW QR CODE</button>
-            <hr style="width: 100%; margin: 20px 0;">
-            <div id="editor-list" style="width: 100%;"></div>
-            <button class="main-btn" onclick="addCustomQuestion()" style="background: #3498db; font-size: 1.1rem;">+ ADD WORD</button>
-            <button class="main-btn" onclick="closeEditor()" style="background: #2ecc71;">SAVE & EXIT</button>
+        <div class="white-box" style="width: 85%;">
+            <h2>WORD EDITOR</h2>
+            <div id="qr-area" style="display:none; background:white; padding:10px; margin-bottom:10px; border:4px solid var(--neon);"></div>
+            <button class="editor-btn" onclick="toggleQR()" style="background:#e67e22; margin-bottom:10px;">TOGGLE QR CODE</button>
+            <div class="editor-container" id="editor-list"></div>
+            <div style="margin-top:15px;">
+                <button class="editor-btn" onclick="addWord()" style="background:#3498db;">+ ADD NEW WORD</button>
+                <button class="editor-btn" onclick="closeEditor()" style="background:var(--win-green);">SAVE & EXIT</button>
+            </div>
         </div>
     </div>
 
     <div id="select-screen" class="screen">
-        <h2 style="color:gold; font-size: 3rem; margin-bottom: 10px;">CHOOSE YOUR HERO</h2>
-        <div id="diff-selector" class="diff-row">
-            <button class="level-btn level-active" onclick="setDiff('easy', this)">EASY</button>
-            <button class="level-btn" onclick="setDiff('normal', this)">NORMAL</button>
-            <button class="level-btn" onclick="setDiff('hard', this)">HARD</button>
+        <h2 style="color:gold; font-size: 3rem;">SELECT CHARACTER</h2>
+        <div id="diff-selector" style="margin-bottom:20px;">
+            <button class="main-btn" id="btn-easy" style="font-size:1rem; padding:10px 20px;" onclick="setDiff('easy')">EASY</button>
+            <button class="main-btn" id="btn-hard" style="font-size:1rem; padding:10px 20px; background:#bdc3c7;" onclick="setDiff('hard')">HARD</button>
         </div>
-        <div class="selection-container">
+        <div style="display:flex; gap:30px;">
             <div class="p-area">
-                <h3 id="p1-label" style="color:var(--p1); font-size: 2rem;">PLAYER 1</h3>
-                <div id="grid1" class="char-grid"></div>
-                <button id="lock1" class="lock-btn" onclick="lockChar(1)" style="background:var(--neon); padding:10px 20px; border-radius:20px; border:none; margin-top:10px; font-weight:bold;">CONFIRM</button>
+                <h3 style="color:var(--p1)">PLAYER 1</h3>
+                <div id="grid1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;"></div>
             </div>
             <div class="p-area">
-                <h3 id="p2-label" style="color:var(--p2); font-size: 2rem;">PLAYER 2</h3>
-                <div id="grid2" class="char-grid"></div>
-                <button id="lock2" class="lock-btn" onclick="lockChar(2)" style="background:var(--neon); padding:10px 20px; border-radius:20px; border:none; margin-top:10px; font-weight:bold;">CONFIRM</button>
+                <h3 id="p2-label" style="color:var(--p2)">PLAYER 2</h3>
+                <div id="grid2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;"></div>
             </div>
         </div>
-        <button class="main-btn" id="fight-btn" style="margin-top:25px; display:none; background: #e74c3c; color:white;" onclick="startGame()">FIGHT!</button>
+        <button class="main-btn" id="fight-btn" style="display:none; background:#e74c3c; margin-top:20px;" onclick="startGame()">FIGHT!</button>
     </div>
 
     <div id="game-container" class="screen">
@@ -99,176 +96,123 @@
             <div class="player-side">
                 <img src="" id="p2-img" class="sprite-img">
                 <div class="hp-bar"><div id="p2-hp" class="hp-fill"></div></div>
-                <div class="quiz-card" id="p2-quiz-ui"><div class="options-grid" id="p2-opts"></div></div>
+                <div class="quiz-card"><div class="options-grid" id="p2-opts"></div></div>
             </div>
         </div>
     </div>
 
     <div id="victory-screen" class="screen">
         <div class="white-box">
-            <h1 id="victory-text" style="font-size: 4rem; color: #000; margin-bottom: 15px;"></h1>
-            <img id="winner-gif" src="" style="height:350px; border-radius:30px; border: 8px solid var(--neon);">
-            <button class="main-btn" onclick="resetToHome()">PLAY AGAIN</button>
+            <h1 id="victory-text" style="font-size: 3rem;"></h1>
+            <img id="winner-gif" src="" style="height:300px; border-radius:20px; border:8px solid var(--win-green);">
+            <button class="main-btn" onclick="location.reload()">PLAY AGAIN</button>
         </div>
     </div>
 
-    <audio id="sfx-hit" src="hit.mp3"></audio>
-    <audio id="sfx-win" src="win.mp3"></audio>
-    <audio id="sfx-wrong" src="wrong.mp3"></audio>
-
     <script>
-        const characters = [
-            { name: "LUFFY", file: "luffy.gif" },
-            { name: "ZORO", file: "zoro.gif" },
-            { name: "SANJI", file: "sanji.gif" },
-            { name: "NAMI", file: "nami.gif" },
-            { name: "CHOPPER", file: "chopper.gif" }
+        const characters = ["luffy.gif", "zoro.gif", "sanji.gif", "nami.gif", "chopper.gif"];
+        let p1Char, p2Char, h1=100, h2=100, isTwoPlayer=false, difficulty='easy', cpuInterval;
+        let questionBank = JSON.parse(localStorage.getItem('seaBattleCache')) || [
+            {word: "quilt", img: "quilt.jpg"}, {word: "queen", img: "queen.jpg"},
+            {word: "rabbit", img: "rabbit.jpg"}, {word: "robot", img: "robot.jpg"},
+            {word: "snake", img: "snake.jpg"}, {word: "sun", img: "sun.jpg"}
         ];
 
-        const defaultQuestions = [
-            { word: "quilt", img: "quilt.jpg" }, { word: "queen", img: "queen.jpg" },
-            { word: "rabbit", img: "rabbit.jpg" }, { word: "robot", img: "robot.jpg" },
-            { word: "snake", img: "snake.jpg" }, { word: "sun", img: "sun.jpg" }
-        ];
+        function speak(txt) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang='en-US'; window.speechSynthesis.speak(u); }
 
-        let p1Char, p2Char, p1Locked = false, p2Locked = false;
-        let h1 = 100, h2 = 100, currentWord = "", cpuTimer;
-        let isTwoPlayer = false, difficulty = 'easy';
-        let questionBank = JSON.parse(localStorage.getItem('seaBattleCache')) || defaultQuestions;
-
-        const diffSettings = { easy: { speed: 8000, acc: 0.4 }, normal: { speed: 5500, acc: 0.7 }, hard: { speed: 3500, acc: 0.9 } };
-
-        function showEditor() { document.getElementById('title-screen').style.display = 'none'; document.getElementById('editor-screen').style.display = 'flex'; renderEditorList(); }
-        function closeEditor() { document.getElementById('editor-screen').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; }
-        
-        function generateQR() {
-            const qrDiv = document.getElementById('qr-display');
-            qrDiv.style.display = 'block';
-            qrDiv.innerHTML = '';
-            new QRCode(qrDiv, { text: window.location.href, width: 200, height: 200 });
-        }
-
-        function renderEditorList() {
+        function showEditor() { document.getElementById('title-screen').style.display='none'; document.getElementById('editor-screen').style.display='flex'; renderEditor(); }
+        function renderEditor() {
             const list = document.getElementById('editor-list'); list.innerHTML = '';
             questionBank.forEach((item, i) => {
-                const div = document.createElement('div');
-                div.style.cssText = "display:flex; background:#eee; margin:5px; padding:10px; border-radius:10px; align-items:center;";
-                div.innerHTML = `<input type="text" value="${item.word}" style="flex:1; margin-right:10px; padding:5px;" onchange="questionBank[${i}].word=this.value.toLowerCase(); localStorage.setItem('seaBattleCache', JSON.stringify(questionBank))">
-                                 <button onclick="questionBank.splice(${i},1); renderEditorList()" style="background:red; color:white; border:none; padding:5px 10px; border-radius:5px;">X</button>`;
+                const div = document.createElement('div'); div.className = 'edit-item';
+                div.innerHTML = `<img src="${item.img}" onclick="speak('${item.word}')"><input type="text" value="${item.word}" onchange="questionBank[${i}].word=this.value.toLowerCase();save()"><button class="editor-btn" onclick="const url=prompt('Img URL:');if(url){questionBank[${i}].img=url;renderEditor();save()}">IMG</button><button class="editor-btn" style="background:red;" onclick="questionBank.splice(${i},1);renderEditor();save()">DEL</button>`;
                 list.appendChild(div);
             });
         }
+        function addWord() { questionBank.push({word: "new", img: "placeholder.jpg"}); renderEditor(); save(); }
+        function save() { localStorage.setItem('seaBattleCache', JSON.stringify(questionBank)); }
+        function closeEditor() { document.getElementById('editor-screen').style.display='none'; document.getElementById('title-screen').style.display='flex'; }
+        function toggleQR() { const a = document.getElementById('qr-area'); a.style.display = a.style.display==='none'?'block':'none'; if(a.innerHTML==="") new QRCode(a, {text: window.location.href, width: 150, height: 150}); }
 
-        function addCustomQuestion() { questionBank.push({ word: "new word", img: "placeholder.jpg" }); renderEditorList(); }
+        function setDiff(d) { difficulty = d; document.getElementById('btn-easy').style.background = d==='easy'?'var(--neon)':'#bdc3c7'; document.getElementById('btn-hard').style.background = d==='hard'?'var(--neon)':'#bdc3c7'; }
 
-        function goToSelection(twoPlayer) {
-            isTwoPlayer = twoPlayer;
-            document.getElementById('title-screen').style.display = 'none';
-            document.getElementById('select-screen').style.display = 'flex';
-            document.getElementById('diff-selector').style.display = twoPlayer ? 'none' : 'flex';
-            document.getElementById('p2-label').innerText = twoPlayer ? "PLAYER 2" : "COMPUTER";
-            initSelection();
+        function goToSelection(tp) {
+            isTwoPlayer = tp;
+            document.getElementById('title-screen').style.display='none';
+            document.getElementById('select-screen').style.display='flex';
+            document.getElementById('grid1').innerHTML = characters.map(c => `<img src="${c}" style="width:85px; border:4px solid #fff; cursor:pointer;" onclick="setChar(1,'${c}',this)">`).join('');
+            
+            if(!tp) {
+                p2Char = characters[Math.floor(Math.random()*characters.length)];
+                document.getElementById('grid2').style.display = 'none';
+                document.getElementById('p2-label').innerText = "COMPUTER READY";
+            } else {
+                document.getElementById('grid2').style.display = 'grid';
+                document.getElementById('p2-label').innerText = "PLAYER 2";
+                document.getElementById('grid2').innerHTML = characters.map(c => `<img src="${c}" style="width:85px; border:4px solid #fff; cursor:pointer;" onclick="setChar(2,'${c}',this)">`).join('');
+            }
         }
 
-        function setDiff(val, btn) {
-            difficulty = val;
-            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('level-active'));
-            btn.classList.add('level-active');
-        }
-
-        function initSelection() {
-            [1, 2].forEach(p => {
-                const grid = document.getElementById('grid' + p); grid.innerHTML = '';
-                characters.forEach(c => {
-                    const card = document.createElement('div'); card.className = 'char-card';
-                    card.innerHTML = `<img src="${c.file}">`;
-                    card.onclick = () => {
-                        if((p===1 && p1Locked) || (p===2 && p2Locked)) return;
-                        if(p === 1) p1Char = c; else p2Char = c;
-                        Array.from(grid.children).forEach(el => el.style.borderColor = "transparent");
-                        card.style.borderColor = (p === 1 ? "var(--p1)" : "var(--p2)");
-                    };
-                    grid.appendChild(card);
-                });
-            });
-            if(!isTwoPlayer) { p2Char = characters[Math.floor(Math.random()*characters.length)]; lockChar(2); }
-        }
-
-        function lockChar(p) {
-            if(p === 1 && p1Char) { p1Locked = true; document.getElementById('lock1').style.background = "#2ecc71"; }
-            else if(p === 2 && p2Char) { p2Locked = true; document.getElementById('lock2').style.background = "#2ecc71"; }
-            if(p1Locked && p2Locked) document.getElementById('fight-btn').style.display = 'block';
+        function setChar(p, c, el) {
+            if(p===1) p1Char = c; else p2Char = c;
+            Array.from(el.parentElement.children).forEach(i => i.style.borderColor='#fff');
+            el.style.borderColor = 'var(--win-green)';
+            if(p1Char && p2Char) document.getElementById('fight-btn').style.display='block';
         }
 
         function startGame() {
-            document.getElementById('select-screen').style.display = 'none';
-            document.getElementById('game-container').style.display = 'flex';
-            document.getElementById('p1-img').src = p1Char.file;
-            document.getElementById('p2-img').src = p2Char.file;
-            document.getElementById('p2-quiz-ui').style.visibility = isTwoPlayer ? 'visible' : 'hidden';
-            h1 = 100; h2 = 100; updateHP(); nextRound();
-            if(!isTwoPlayer) startCPU();
+            document.getElementById('select-screen').style.display='none';
+            document.getElementById('game-container').style.display='flex';
+            document.getElementById('p1-img').src = p1Char;
+            document.getElementById('p2-img').src = p2Char;
+            nextRound();
+            if(!isTwoPlayer) {
+                cpuInterval = setInterval(() => {
+                    if(Math.random() > (difficulty==='easy'?0.75:0.35)) {
+                        const btns = document.querySelectorAll('#p2-opts .btn-opt');
+                        btns.forEach(b => { if(b.getAttribute('data-word') === currentWord) b.classList.add('btn-correct'); });
+                        setTimeout(() => { attack(1); nextRound(); }, 600);
+                    }
+                }, 6000);
+            }
         }
 
-        function startCPU() {
-            const conf = diffSettings[difficulty];
-            cpuTimer = setInterval(() => {
-                if(Math.random() < conf.acc) { attack(1); nextRound(); }
-                else { document.getElementById('sfx-wrong').play(); }
-            }, conf.speed);
-        }
-
+        let currentWord = "";
         function nextRound() {
             const target = questionBank[Math.floor(Math.random() * questionBank.length)];
             currentWord = target.word;
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(currentWord); u.lang = 'en-US'; window.speechSynthesis.speak(u);
-
-            let opts = [target];
-            let pool = [...questionBank].filter(q => q.word !== target.word);
-            while(opts.length < 4 && pool.length > 0) opts.push(pool.splice(Math.floor(Math.random()*pool.length), 1)[0]);
-            opts.sort(() => Math.random() - 0.5);
-
+            speak(target.word);
+            let opts = [target, ...questionBank.filter(q => q !== target).sort(() => 0.5-Math.random()).slice(0,3)].sort(() => 0.5-Math.random());
+            
             [1, 2].forEach(p => {
-                const b = document.getElementById(`p${p}-opts`); b.innerHTML = '';
-                opts.forEach(opt => {
-                    const btn = document.createElement('button'); btn.className = 'btn-opt';
-                    btn.innerHTML = `<img src="${opt.img}" onerror="this.src='placeholder.jpg'">`;
-                    btn.onclick = () => {
-                        if(opt.word === currentWord) { attack(p === 1 ? 2 : 1); nextRound(); }
-                        else { document.getElementById('sfx-wrong').play(); nextRound(); }
-                    };
-                    b.appendChild(btn);
-                });
+                const b = document.getElementById(`p${p}-opts`);
+                b.innerHTML = opts.map(o => `<button class="btn-opt" data-word="${o.word}" onclick="handlePress(${p},this,'${o.word}','${target.word}')"><img src="${o.img}"></button>`).join('');
             });
         }
 
+        function handlePress(p, el, choice, correct) {
+            if(choice === correct) {
+                el.classList.add('btn-correct');
+                setTimeout(() => { attack(p===1?2:1); nextRound(); }, 300);
+            } else {
+                nextRound();
+            }
+        }
+
         function attack(vic) {
-            document.getElementById('sfx-hit').play();
             const s = document.getElementById(`p${vic}-img`);
-            s.style.filter = "brightness(3)";
-            if(vic === 1) h1 -= 10; else h2 -= 10;
-            updateHP();
-            setTimeout(() => { s.style.filter = "none"; }, 200);
-            if(h1 <= 0 || h2 <= 0) endGame(h1 <= 0 ? 2 : 1);
+            s.style.filter = "brightness(3) saturate(0)";
+            if(vic===1) h1-=10; else h2-=10;
+            document.getElementById(`p${vic}-hp`).style.width = (vic===1?h1:h2)+"%";
+            setTimeout(() => s.style.filter="none", 250);
+            if(h1<=0 || h2<=0) {
+                clearInterval(cpuInterval);
+                document.getElementById('game-container').style.display='none';
+                document.getElementById('victory-screen').style.display='flex';
+                document.getElementById('victory-text').innerText = (h1<=0? (isTwoPlayer?"PLAYER 2":"COMPUTER") : "PLAYER 1") + " WINS!";
+                document.getElementById('winner-gif').src = h1<=0 ? p2Char : p1Char;
+            }
         }
-
-        function updateHP() {
-            document.getElementById(`p1-hp`).style.width = h1 + '%';
-            document.getElementById(`p2-hp`).style.width = h2 + '%';
-        }
-
-        function endGame(win) {
-            clearInterval(cpuTimer);
-            document.getElementById('sfx-win').play();
-            document.getElementById('game-container').style.display = 'none';
-            document.getElementById('victory-screen').style.display = 'flex';
-            const winner = (win === 1) ? p1Char : p2Char;
-            document.getElementById('victory-text').innerText = (win === 2 && !isTwoPlayer ? "COMPUTER" : winner.name) + " WINS!";
-            document.getElementById('winner-gif').src = winner.file;
-        }
-
-        function resetToHome() { location.reload(); }
     </script>
 </body>
 </html>
