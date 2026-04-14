@@ -2,45 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>One Piece: Grand Sea Battle</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --p1: #e74c3c; --p2: #3498db; --neon: #f1c40f; --win-green: #2ecc71; }
-        * { font-family: 'Fredoka', sans-serif; box-sizing: border-box; font-variant: small-caps; }
+        * { font-family: 'Fredoka', sans-serif; box-sizing: border-box; font-variant: small-caps; -webkit-tap-highlight-color: transparent; }
         
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; touch-action: manipulation; }
         #bg-layer { position: fixed; inset: 0; background-image: url('title_bg.jpg'); background-size: cover; background-position: center; z-index: 1; }
         
-        .screen { position: absolute; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
+        .screen { position: absolute; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); padding: 10px; }
         #select-screen, #editor-screen, #game-container, #victory-screen { display: none; }
 
-        .white-box { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 40px; border: 10px solid var(--neon); display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .white-box { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 30px; border: 8px solid var(--neon); display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1000px; }
         
-        /* Editor Styles */
-        .editor-container { width: 95%; max-height: 60vh; overflow-y: auto; background: white; padding: 15px; border-radius: 20px; }
-        .edit-item { display: flex; align-items: center; gap: 15px; background: #f9f9f9; padding: 10px; border-radius: 15px; margin-bottom: 10px; border: 2px solid #ddd; }
-        .edit-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 2px solid var(--neon); cursor: pointer; }
-        .edit-item input[type="text"] { flex: 1; padding: 8px; font-size: 1.1rem; border: 2px solid #ccc; border-radius: 10px; }
-        .editor-btn { background: #34495e; color: white; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .arena-layout { display: grid; grid-template-columns: 1fr 1fr; width: 95vw; height: 90vh; gap: 15px; }
+        
+        @media (max-width: 768px) {
+            .arena-layout { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+            .sprite-img { height: 120px !important; }
+            .btn-opt img { height: 70px !important; }
+        }
 
-        /* Arena Layout */
-        .arena-layout { display: flex; flex-direction: row; width: 95vw; height: 85vh; gap: 20px; }
-        .player-side { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px; }
-        .sprite-img { height: 260px; width: auto; filter: drop-shadow(0 0 25px rgba(0,0,0,0.2)); transition: filter 0.2s; }
-        .hp-bar { width: 90%; height: 30px; background: #333; border: 3px solid #000; border-radius: 15px; overflow: hidden; }
+        .player-side { display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 5px; }
+        .sprite-img { height: 220px; width: auto; filter: drop-shadow(0 0 15px rgba(0,0,0,0.2)); transition: filter 0.2s; }
+        .hp-bar { width: 90%; height: 20px; background: #333; border: 2px solid #000; border-radius: 10px; overflow: hidden; }
         .hp-fill { width: 100%; height: 100%; background: var(--win-green); transition: 0.4s; }
         
-        .quiz-card { background: #f0f0f0; padding: 15px; border-radius: 25px; width: 100%; border: 4px solid #ccc; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .quiz-card { background: #f0f0f0; padding: 10px; border-radius: 20px; width: 100%; border: 3px solid #ccc; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         
-        /* Selection and Quiz Buttons */
-        .btn-opt { padding: 5px; border-radius: 20px; border: 6px solid #fff; cursor: pointer; background: #fff; transition: border-color 0.2s; }
-        .btn-opt img { width: 100%; height: 120px; object-fit: contain; border-radius: 10px; }
-        .btn-correct { border-color: var(--win-green) !important; }
+        .btn-opt { padding: 4px; border-radius: 15px; border: 4px solid #fff; cursor: pointer; background: #fff; }
+        .btn-opt img { width: 100%; height: 110px; object-fit: contain; border-radius: 8px; }
+        .btn-correct { border-color: var(--win-green) !important; animation: pop 0.3s ease; }
 
-        .main-btn { padding: 15px 40px; font-size: 1.8rem; border-radius: 50px; background: var(--neon); color: #000; cursor: pointer; font-weight: bold; border: none; margin: 10px; }
+        @keyframes pop { 50% { transform: scale(1.1); } }
+
+        .editor-container { width: 100%; max-height: 40vh; overflow-y: auto; background: white; padding: 10px; border-radius: 15px; }
+        .edit-item { display: flex; align-items: center; gap: 10px; background: #f9f9f9; padding: 8px; border-radius: 12px; margin-bottom: 8px; }
+        .edit-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+        
+        .main-btn { padding: 12px 30px; font-size: 1.5rem; border-radius: 40px; background: var(--neon); color: #000; cursor: pointer; font-weight: bold; border: none; margin: 8px; width: 80%; max-width: 300px; }
     </style>
 </head>
 <body>
@@ -48,38 +52,30 @@
     <div id="bg-layer"></div>
 
     <div id="title-screen" class="screen">
-        <h1 style="font-size: 5rem; color: var(--neon); text-shadow: 6px 6px 0 #000;">GRAND LINE</h1>
-        <button class="main-btn" onclick="goToSelection(false)">1 PLAYER (CPU)</button>
+        <h1 style="font-size: 4rem; color: var(--neon); text-shadow: 4px 4px 0 #000; text-align: center;">GRAND LINE</h1>
+        <button class="main-btn" onclick="goToSelection(false)">1 PLAYER</button>
         <button class="main-btn" onclick="goToSelection(true)" style="background: #3498db;">2 PLAYERS</button>
-        <button class="main-btn" style="background: #95a5a6; font-size: 1.1rem;" onclick="showEditor()">EDITOR & QR CODE</button>
+        <button class="main-btn" style="background: #95a5a6; font-size: 1rem;" onclick="showEditor()">EDITOR & QR</button>
     </div>
 
     <div id="editor-screen" class="screen">
-        <div class="white-box" style="width: 85%;">
-            <h2>WORD EDITOR</h2>
-            <div id="qr-area" style="display:none; background:white; padding:10px; margin-bottom:10px; border:4px solid var(--neon);"></div>
-            <button class="editor-btn" onclick="toggleQR()" style="background:#e67e22; margin-bottom:10px;">TOGGLE QR CODE</button>
+        <div class="white-box">
+            <h2>EDITOR & SHARE</h2>
+            <div id="qr-area" style="display:none; padding:15px; background:white; margin-bottom:10px; border-radius:15px;"></div>
+            <button class="main-btn" onclick="generateSharedQR()" style="background:#e67e22; font-size:1rem;">GENERATE QR FOR CLASS</button>
+            <p style="font-size: 0.8rem; color: #666; margin: 0;">(This QR includes your saved words)</p>
             <div class="editor-container" id="editor-list"></div>
-            <div style="margin-top:15px;">
-                <button class="editor-btn" onclick="addWord()" style="background:#3498db;">+ ADD NEW WORD</button>
-                <button class="editor-btn" onclick="closeEditor()" style="background:var(--win-green);">SAVE & EXIT</button>
-            </div>
+            <button class="main-btn" onclick="addWord()" style="background:#3498db; font-size:1rem;">+ ADD WORD</button>
+            <button class="main-btn" onclick="closeEditor()" style="background:var(--win-green); font-size:1rem;">SAVE & EXIT</button>
         </div>
     </div>
 
     <div id="select-screen" class="screen">
-        <h2 style="color:gold; font-size: 3rem;">SELECT CHARACTER</h2>
-        <div style="display:flex; gap:30px;">
-            <div class="p-area">
-                <h3 style="color:var(--p1)">PLAYER 1</h3>
-                <div id="grid1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;"></div>
-            </div>
-            <div class="p-area">
-                <h3 id="p2-label" style="color:var(--p2)">PLAYER 2</h3>
-                <div id="grid2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;"></div>
-            </div>
+        <h2 style="color:gold; font-size: 2.5rem;">CHOOSE HERO</h2>
+        <div style="display:flex; flex-wrap: wrap; justify-content: center; gap:15px;">
+            <div id="grid1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;"></div>
         </div>
-        <button class="main-btn" id="fight-btn" style="display:none; background:#e74c3c; margin-top:20px;" onclick="startGame()">FIGHT!</button>
+        <button class="main-btn" id="fight-btn" style="display:none; background:#e74c3c; margin-top:15px;" onclick="startGame()">FIGHT!</button>
     </div>
 
     <div id="game-container" class="screen">
@@ -99,80 +95,81 @@
 
     <div id="victory-screen" class="screen">
         <div class="white-box">
-            <h1 id="victory-text" style="font-size: 3rem;"></h1>
-            <img id="winner-gif" src="" style="height:300px; border-radius:20px; border:8px solid var(--win-green);">
-            <button class="main-btn" onclick="location.reload()">PLAY AGAIN</button>
+            <h1 id="victory-text" style="font-size: 2.5rem;"></h1>
+            <img id="winner-gif" src="" style="height:200px; border-radius:15px;">
+            <button class="main-btn" onclick="location.reload()">REPLAY</button>
         </div>
     </div>
 
     <script>
         const characters = ["luffy.gif", "zoro.gif", "sanji.gif", "nami.gif", "chopper.gif"];
-        let p1Char, p2Char, h1=100, h2=100, isTwoPlayer=false, cpuInterval;
-        let questionBank = JSON.parse(localStorage.getItem('seaBattleCache')) || [
-            {word: "quilt", img: "quilt.jpg"}, {word: "queen", img: "queen.jpg"},
-            {word: "rabbit", img: "rabbit.jpg"}, {word: "robot", img: "robot.jpg"},
-            {word: "snake", img: "snake.jpg"}, {word: "sun", img: "sun.jpg"}
-        ];
+        let p1Char, p2Char, h1=100, h2=100, isTwoPlayer=false, cpuInterval, currentWord="";
+        
+        // --- DATA SYNC LOGIC ---
+        function getInitialData() {
+            const hashData = window.location.hash.substring(1);
+            if (hashData) {
+                try {
+                    const decoded = JSON.parse(decodeURIComponent(atob(hashData)));
+                    localStorage.setItem('seaBattleCache', JSON.stringify(decoded));
+                    window.location.hash = ""; // Clean URL after import
+                    return decoded;
+                } catch(e) { console.error("Import failed"); }
+            }
+            return JSON.parse(localStorage.getItem('seaBattleCache')) || [
+                {word: "quilt", img: "quilt.jpg"}, {word: "queen", img: "queen.jpg"},
+                {word: "rabbit", img: "rabbit.jpg"}, {word: "robot", img: "robot.jpg"}
+            ];
+        }
+
+        let questionBank = getInitialData();
+
+        function generateSharedQR() {
+            const area = document.getElementById('qr-area');
+            area.innerHTML = "";
+            area.style.display = "block";
+            
+            // Encode words into the URL
+            const dataString = btoa(encodeURIComponent(JSON.stringify(questionBank)));
+            const shareUrl = window.location.origin + window.location.pathname + "#" + dataString;
+            
+            new QRCode(area, { text: shareUrl, width: 200, height: 200 });
+        }
+        // -----------------------
 
         function speak(txt) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang='en-US'; window.speechSynthesis.speak(u); }
-
         function showEditor() { document.getElementById('title-screen').style.display='none'; document.getElementById('editor-screen').style.display='flex'; renderEditor(); }
         
         function renderEditor() {
             const list = document.getElementById('editor-list'); list.innerHTML = '';
             questionBank.forEach((item, i) => {
                 const div = document.createElement('div'); div.className = 'edit-item';
-                div.innerHTML = `
-                    <img src="${item.img}" onclick="speak('${item.word}')">
-                    <input type="text" value="${item.word}" onchange="questionBank[${i}].word=this.value.toLowerCase();save()">
-                    <input type="file" id="file-${i}" style="display:none" onchange="handleFileUpload(${i}, this)">
-                    <button class="editor-btn" onclick="document.getElementById('file-${i}').click()">UPLOAD</button>
-                    <button class="editor-btn" style="background:red;" onclick="questionBank.splice(${i},1);renderEditor();save()">DEL</button>
-                `;
+                div.innerHTML = `<img src="${item.img}" onclick="speak('${item.word}')">
+                    <input type="text" value="${item.word}" style="flex:1;" onchange="questionBank[${i}].word=this.value.toLowerCase();save()">
+                    <input type="file" id="f-${i}" style="display:none" onchange="upload(${i},this)">
+                    <button onclick="document.getElementById('f-${i}').click()">UP</button>
+                    <button style="background:red;color:white;" onclick="questionBank.splice(${i},1);renderEditor();save()">DEL</button>`;
                 list.appendChild(div);
             });
         }
-
-        function handleFileUpload(index, input) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    questionBank[index].img = e.target.result;
-                    renderEditor();
-                    save();
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
+        function upload(i, input) { const f = input.files[0]; if(f){ const r = new FileReader(); r.onload=(e)=>{questionBank[i].img=e.target.result; renderEditor(); save();}; r.readAsDataURL(f); }}
         function addWord() { questionBank.push({word: "new", img: "placeholder.jpg"}); renderEditor(); save(); }
         function save() { localStorage.setItem('seaBattleCache', JSON.stringify(questionBank)); }
         function closeEditor() { document.getElementById('editor-screen').style.display='none'; document.getElementById('title-screen').style.display='flex'; }
-        function toggleQR() { const a = document.getElementById('qr-area'); a.style.display = a.style.display==='none'?'block':'none'; if(a.innerHTML==="") new QRCode(a, {text: window.location.href, width: 150, height: 150}); }
 
         function goToSelection(tp) {
             isTwoPlayer = tp;
             document.getElementById('title-screen').style.display='none';
             document.getElementById('select-screen').style.display='flex';
-            document.getElementById('grid1').innerHTML = characters.map(c => `<img src="${c}" style="width:85px; border:4px solid #fff; cursor:pointer;" onclick="setChar(1,'${c}',this)">`).join('');
-            
-            if(!tp) {
-                p2Char = characters[Math.floor(Math.random()*characters.length)];
-                document.getElementById('grid2').style.display = 'none';
-                document.getElementById('p2-label').innerText = "COMPUTER READY";
-            } else {
-                document.getElementById('grid2').style.display = 'grid';
-                document.getElementById('p2-label').innerText = "PLAYER 2";
-                document.getElementById('grid2').innerHTML = characters.map(c => `<img src="${c}" style="width:85px; border:4px solid #fff; cursor:pointer;" onclick="setChar(2,'${c}',this)">`).join('');
-            }
+            document.getElementById('grid1').innerHTML = characters.map(c => `<img src="${c}" style="width:75px; border:4px solid #fff; border-radius:10px;" onclick="setChar(1,'${c}',this)">`).join('');
+            p2Char = characters[Math.floor(Math.random()*characters.length)];
         }
 
         function setChar(p, c, el) {
-            if(p===1) p1Char = c; else p2Char = c;
+            p1Char = c;
             Array.from(el.parentElement.children).forEach(i => i.style.borderColor='#fff');
             el.style.borderColor = 'var(--win-green)';
-            if(p1Char && p2Char) document.getElementById('fight-btn').style.display='block';
+            document.getElementById('fight-btn').style.display='block';
         }
 
         function startGame() {
@@ -183,22 +180,18 @@
             nextRound();
             if(!isTwoPlayer) {
                 cpuInterval = setInterval(() => {
-                    if(Math.random() > 0.4) {
-                        const btns = document.querySelectorAll('#p2-opts .btn-opt');
-                        btns.forEach(b => { if(b.getAttribute('data-word') === currentWord) b.classList.add('btn-correct'); });
-                        setTimeout(() => { attack(1); nextRound(); }, 700);
+                    if(Math.random() > 0.6) {
+                        document.querySelectorAll('#p2-opts .btn-opt').forEach(b => { if(b.getAttribute('data-word') === currentWord) b.classList.add('btn-correct'); });
+                        setTimeout(() => { attack(1); nextRound(); }, 800);
                     }
-                }, 6000);
+                }, 7000);
             }
         }
 
-        let currentWord = "";
         function nextRound() {
             const target = questionBank[Math.floor(Math.random() * questionBank.length)];
-            currentWord = target.word;
-            speak(target.word);
+            currentWord = target.word; speak(target.word);
             let opts = [target, ...questionBank.filter(q => q !== target).sort(() => 0.5-Math.random()).slice(0,3)].sort(() => 0.5-Math.random());
-            
             [1, 2].forEach(p => {
                 const b = document.getElementById(`p${p}-opts`);
                 b.innerHTML = opts.map(o => `<button class="btn-opt" data-word="${o.word}" onclick="handlePress(${p},this,'${o.word}','${target.word}')"><img src="${o.img}"></button>`).join('');
@@ -209,14 +202,12 @@
             if(choice === correct) {
                 el.classList.add('btn-correct');
                 setTimeout(() => { attack(p===1?2:1); nextRound(); }, 300);
-            } else {
-                nextRound();
-            }
+            } else { nextRound(); }
         }
 
         function attack(vic) {
             const s = document.getElementById(`p${vic}-img`);
-            s.style.filter = "brightness(3) saturate(0)";
+            s.style.filter = "brightness(3) grayscale(1)";
             if(vic===1) h1-=10; else h2-=10;
             document.getElementById(`p${vic}-hp`).style.width = (vic===1?h1:h2)+"%";
             setTimeout(() => s.style.filter="none", 250);
@@ -224,7 +215,7 @@
                 clearInterval(cpuInterval);
                 document.getElementById('game-container').style.display='none';
                 document.getElementById('victory-screen').style.display='flex';
-                document.getElementById('victory-text').innerText = (h1<=0? (isTwoPlayer?"PLAYER 2":"COMPUTER") : "PLAYER 1") + " WINS!";
+                document.getElementById('victory-text').innerText = (h1<=0? (isTwoPlayer?"P2":"CPU") : "P1") + " WINS!";
                 document.getElementById('winner-gif').src = h1<=0 ? p2Char : p1Char;
             }
         }
